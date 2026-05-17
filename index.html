@@ -337,11 +337,12 @@ if(!income || !goal || !years){ alert("Fill required fields"); return; }
 // ✅ UPDATED
 let expensePercent = expensePercentInput || 50;
 let expense = income * (expensePercent/100);
+let totalExpense = expense + emi;
 let suggestedExpense = income * 0.5;
 
-let emergency6 = expense*6;
-let emergency9 = expense*9;
-let emergency12 = expense*12;
+let emergency6 = totalExpense * 6;
+let emergency9 = totalExpense * 9;
+let emergency12 = totalExpense * 12;
 
 let emiRatio = (emi/income)*100 || 0;
 
@@ -509,7 +510,30 @@ let sipNormal = goal/(((Math.pow(1+r,years*12)-1)/r)*(1+r));
 let bestSip = sipNormal;
 
 
-let sipInflation = inflatedGoal/(((Math.pow(1+r,years*12)-1)/r)*(1+r));
+function calculateExactSIP(target, r, months){
+
+    let low = 0;
+    let high = target; // max possible
+    let mid, fv;
+
+    while(high - low > 1){
+
+        mid = (low + high) / 2;
+
+        fv = mid * ((Math.pow(1+r, months) - 1) / r) * (1+r);
+
+        if(fv < target){
+            low = mid;
+        }else{
+            high = mid;
+        }
+    }
+
+    return Math.round(high); // ₹1 precision
+}
+
+// 🔥 USE THIS
+let sipInflation = calculateExactSIP(inflatedGoal, r, years * 12);
 
 // ⚖️ RISK BASED SIP ADJUSTMENT (CORRECT PLACE)
 if(risk === "high"){
@@ -520,7 +544,7 @@ else if(risk === "low"){
 }
 
 let gap = sipInflation - sipNormal;
-let gapPercent = (gap / sipInflation) * 100;
+let gapPercent = (sipInflation - sipNormal) / sipNormal * 100;
 
 let statusText = "";
 let statusColor = "";
@@ -591,7 +615,7 @@ document.getElementById("goalTab").innerHTML=`
 <div class="card">
 
 <div class="highlight">
-SIP ₹${bestSip.toFixed(0)}/month 
+SIP ₹${sipNormal.toFixed(0)}/month
 <span style="
 background:${realReturn < 4 ? '#ef4444' : '#22c55e'};
 color:#020617;
@@ -627,7 +651,7 @@ margin-top:10px;
 padding:10px;
 border-radius:10px;
 background:rgba(239,68,68,0.1);
-color:#ef4444;
+color:#eab308;
 border:1px solid #ef4444;
 font-size:12px;
 ">
@@ -641,7 +665,7 @@ font-size:12px;
 <div class="highlight">Real SIP Needed ₹${sipInflation.toFixed(0)}/month</div>
 
 <p style="color:#f87171;font-size:13px;">
-⚠️ Goal grows ₹${goal} → ₹${inflatedGoal.toFixed(0)}
+⚠️ Goal grows ₹${goal.toFixed(0)} → ₹${inflatedGoal.toFixed(0)}
 </p>
 
 <div class="chartBox">
@@ -663,7 +687,7 @@ font-size:13px;
 padding:10px;
 border-radius:10px;
 background:${gapPercent > 30 ? 'rgba(239,68,68,0.15)' : 'rgba(56,189,248,0.1)'};
-color:${gapPercent > 30 ? '#ef4444' : '#38bdf8'};
+color:${gapPercent > 30 ? '#eab308' : '#38bdf8'};
 border:1px solid ${gapPercent > 30 ? '#ef4444' : '#38bdf8'};
 font-weight:bold;
 ">
@@ -704,7 +728,7 @@ for(let i=1;i<=years;i++){
 let months = i * 12;
 
 // ✅ CORRECT SIP FUTURE VALUE
-let fv = bestSip * ((Math.pow(1+r, months) - 1) / r) * (1+r);
+let fv = sipNormal * ((Math.pow(1+r, months) - 1) / r) * (1+r);
 
 // ✅ REAL VALUE (inflation adjusted)
 let realVal = fv / Math.pow(1+inflation, i);
@@ -779,7 +803,7 @@ gradient3.addColorStop(1,"#0f172a");
 new Chart(ctx3,{
 type:'bar',
 data:{
-labels:['Without Inflation','With Inflation'],
+labels:['Nominal SIP','Real SIP (Inflation Adjusted)'],
 datasets:[{
 data:[sipNormal,sipInflation],
 backgroundColor:gradient3,
