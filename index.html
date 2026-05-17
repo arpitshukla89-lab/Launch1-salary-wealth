@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title></title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  *{
+max-width:100%;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Inter',Arial;
+background:radial-gradient(circle at top,#0f172a,#020617);
+color:white;
+margin:0;
+}
+.container{max-width:1100px;margin:auto;padding:20px;}
+.card{
+background:rgba(255,255,255,0.06);
+padding:20px;
+border-radius:18px;
+margin-bottom:20px;
+transition:all 0.3s ease;
+backdrop-filter:blur(12px);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 8px 30px rgba(0,0,0,0.3);
+}
+
+.card:hover{
+transform:none;
+box-shadow:0 20px 50px rgba(0,0,0,0.6);
+}
+.grid{display:grid;gap:10px;}
+@media(min-width:600px){.grid{grid-template-columns:1fr 1fr;}}
+input,select{
+padding:14px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,0.1);
+background:rgba(255,255,255,0.05);
+color:white;
+outline:none;
+backdrop-filter:blur(6px);
+}
+button{
+padding:14px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+color:white;
+margin-top:10px;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 4px 20px rgba(59,130,246,0.3);
+}
+
+button:hover{
+transform:scale(1.05);
+box-shadow:0 8px 30px rgba(139,92,246,0.5);
+}
+.tabs{
+display:flex;
+justify-content:center;
+gap:14px;
+overflow-x:auto;
+scroll-behavior:smooth;
+-webkit-overflow-scrolling:touch;
+padding:8px;
+background:rgba(255,255,255,0.03);
+border-radius:14px;
+}
+.tab{
+padding:10px 18px;
+font-size:14px;
+min-width:100px;
+text-align:center;
+background:rgba(255,255,255,0.05);
+border-radius:14px;
+cursor:pointer;
+transition:all 0.3s ease;
+position:relative;
+overflow:hidden;
+font-weight:500;
+}
+.tab{
+backdrop-filter:blur(6px);
+}
+
+.tab.active{
+background:linear-gradient(135deg,#3b82f6,#6366f1);
+color:white;
+box-shadow:0 0 20px rgba(59,130,246,0.6);
+}
+.tab.active{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+color:white;
+box-shadow:0 8px 30px rgba(37,99,235,0.7);
+transform:scale(1);
+}
+.tab.active::after{
+content:'';
+position:absolute;
+inset:0;
+background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
+animation:shine 1.5s infinite;
+}
+
+@keyframes shine{
+0%{transform:translateX(-100%);}
+100%{transform:translateX(100%);}
+}
+.tabContent{display:none;}
+.tabContent.active{display:block;}
+.bar{height:12px;border-radius:10px;background:linear-gradient(to right,green,yellow,red);position:relative;margin:10px 0;}
+.pointer{width:8px;height:20px;background:white;position:absolute;top:-5px;}
+.chartBox{height:260px;margin-top:15px;}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;}
+.green{background:#22c55e;}
+.yellow{background:#eab308;}
+.red{background:#ef4444;}
+.highlight{font-size:20px;font-weight:bold;color:#22c55e;}
+/* 🔥 INVESTMENT OPTION TABS */
+.optTab{
+padding:8px 14px;
+background:rgba(255,255,255,0.05);
+border-radius:10px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.optTab.active{
+background:rgba(255,255,255,0.15);
+font-weight:bold;
+}
+
+.optContent{
+display:none;
+padding:12px;
+background:#020617;
+border-radius:12px;
+border:1px solid #1e293b;
+}
+
+.optContent.active{
+display:block;
+}
+/* 🔥 CLICKABLE OPTION CARDS */
+.optGrid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.optCard{
+display:block;
+padding:12px;
+border-radius:12px;
+background:linear-gradient(135deg,#020617,#0f172a);
+border:1px solid rgba(255,255,255,0.1);
+text-align:center;
+text-decoration:none;
+color:white;
+font-weight:bold;
+transition:0.3s;
+}
+
+.optCard:hover{
+transform:scale(1.05);
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+/* 🤖 AI BADGE STYLE */
+
+.badge{
+background:linear-gradient(135deg,#22c55e,#4ade80);
+color:#020617;
+padding:2px 6px;
+border-radius:6px;
+font-size:10px;
+margin-left:6px;
+font-weight:bold;
+}
+/* 🎨 COLOR BASED TABS */
+
+.equityTab.active{
+background:rgba(0,194,255,0.2);
+color:#00c2ff;
+border:1px solid #00c2ff;
+}
+
+.debtTab.active{
+background:rgba(0,255,136,0.2);
+color:#00ff88;
+border:1px solid #00ff88;
+}
+
+.goldTab.active{
+background:rgba(255,215,0,0.2);
+color:#ffd700;
+border:1px solid #ffd700;
+}
+/* 🎨 CATEGORY BASED BUTTON COLORS */
+
+.equityCard{
+background:linear-gradient(135deg,#001f2f,#003b5c);
+border:1px solid #00c2ff;
+color:#00c2ff;
+}
+
+.debtCard{
+background:linear-gradient(135deg,#002f1f,#005c3b);
+border:1px solid #00ff88;
+color:#00ff88;
+}
+
+.goldCard{
+background:linear-gradient(135deg,#3a2f00,#6b5600);
+border:1px solid #ffd700;
+color:#ffd700;
+}
+@media(max-width:600px){
+.optGrid{
+grid-template-columns:1fr;
+}
+}
+
+.container{
+padding:12px;
+}
+
+.card{
+padding:14px;
+border-radius:14px;
+}
+
+.grid{
+grid-template-columns:1fr !important;
+}
+
+.tabs{
+gap:6px;
+}
+
+.tab{
+font-size:14px;
+padding:10px 14px;
+min-width:100px;
+}
+button{
+padding:12px;
+font-size:14px;
+}
+
+h2{
+font-size:18px;
+}
+
+}
+
+</style>
+</head>
+
+<body>  
+
+<div class="container">
+
+<div class="card">
+<div class="grid">
+<input id="income" placeholder="Monthly Income">
+<input id="emi" placeholder="Monthly EMI">
+
+<!-- ✅ SHIFTED HERE -->
+<input 
+id="expensePercent" 
+type="number" 
+max="100" 
+min="0" 
+placeholder="Monthly Expense % (0-100)"
+oninput="if(this.value > 100) this.value = 100; if(this.value < 0) this.value = 0;">
+
+<input id="goal" placeholder="Goal Amount">
+<input id="years" placeholder="Years">
+
+<select id="risk">
+<option value="low">Low Risk</option>
+<option value="medium">Medium Risk</option>
+<option value="high">High Risk</option>
+</select>
+</div>
+
+<button onclick="calculate()">Generate Plan</button>
+<!-- EXPENSE SLIDER -->
+<input type="range" min="0" max="100" id="expenseSlider" value="50"
+oninput="document.getElementById('expensePercent').value=this.value"
+style="grid-column:span 2;">
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="showTab('health',this)">Health</div>
+<div class="tab" onclick="showTab('goalTab',this)">Goal</div>
+<div class="tab" onclick="showTab('portfolio',this)">Portfolio</div>
+</div>
+
+<div id="health" class="tabContent active"></div>
+<div id="goalTab" class="tabContent"></div>
+<div id="portfolio" class="tabContent"></div>
+
+
+</div>
+
+<script>
+
+function showTab(id,el){
+document.querySelectorAll(".tabContent").forEach(e=>e.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+el.classList.add("active");
+}
+
+function calculate(){
+
+let income = Number(document.getElementById("income").value.replace(/,/g,''));
+let emi = Number(document.getElementById("emi").value.replace(/,/g,''));
+let goal = Number(document.getElementById("goal").value.replace(/,/g,''));
+let years = Number(document.getElementById("years").value);
+let risk = document.getElementById("risk").value;
+
+// ✅ NEW INPUT
+let expensePercentInput = Math.min(100, Number(document.getElementById("expensePercent").value));
+
+if(!income || !goal || !years){ alert("Fill required fields"); return; }
+
+// ===== HEALTH CALC =====
+
+// ✅ UPDATED
+let expensePercent = expensePercentInput || 50;
+let expense = income * (expensePercent/100);
+let suggestedExpense = income * 0.5;
+
+let emergency6 = expense*6;
+let emergency9 = expense*9;
+let emergency12 = expense*12;
+
+let emiRatio = (emi/income)*100 || 0;
+
+// ✅ UPDATED SCORE
+let totalBurden = emiRatio + expensePercent;
+let score = 100 - totalBurden;
+score = Math.max(0, Math.min(100, score));
+score = Math.max(0, Math.min(100, score));
+
+let emiColor = emiRatio <=30 ? "#22c55e" : emiRatio <=40 ? "#eab308" : "#ef4444";
+let emiCategory = emiRatio <=30 ? "🟢 Safe" :
+                  emiRatio <=40 ? "🟡 Unsafe" : "🔴 Hazardous";
+
+// ✅ CATEGORY
+let expenseStatus = expensePercent <=50 ? "🟢 Healthy Spending" :
+expensePercent<=70 ? "🟡 Moderate Spending" : "🔴 High Spending";
+
+let expenseColor = expensePercent <=50 ? "#22c55e" :
+expensePercent<=70 ? "#eab308" : "#ef4444";
+// ✅ AI ADVICE
+let advice = "";
+
+if(score < 40){
+  advice = "🚨 You are financially stressed. Reduce expenses or EMI immediately.";
+}
+else if(score < 70){
+  advice = "⚠️ You are average. Improve savings and control expenses.";
+}
+else{
+  advice = "✅ You are doing great. Increase investments for faster growth.";
+}
+
+// ✅ RISK ALERT
+let riskAlert = (emiRatio + expensePercent) > 80 
+? "🚨 High Financial Risk" 
+: "✅ Risk Under Control";
+
+// ===== HEALTH TAB =====
+document.getElementById("health").innerHTML=`
+
+<!-- ✅ CARD 1 -->
+<div class="card">
+
+<div class="highlight" style="color:${score>=75?'#22c55e':score>=50?'#eab308':'#ef4444'}">
+Financial Score ${score.toFixed(0)}
+</div>
+
+<div class="bar">
+<div class="pointer" style="left:${Math.min(100 - score,100)}%"></div>
+</div>
+
+<p>💳 EMI Ratio: 
+<span style="color:${emiColor};font-weight:bold;">
+${emiRatio.toFixed(1)}% (${emiCategory})
+</span>
+</p>
+
+<p>
+<span class="dot green"></span>0-30
+<span class="dot yellow"></span>30-40
+<span class="dot red"></span>40+
+</p>
+
+</div>
+
+<!-- ✅ CARD 2 -->
+<div class="card">
+
+<p>Monthly Expense: ₹${expense} (${expensePercent}%)</p>
+
+<p style="color:#a78bfa;">
+💡 Suggested Expense: ₹${suggestedExpense.toFixed(0)} (50% rule)
+</p>
+
+<div class="bar">
+<div class="pointer" style="left:${Math.min(expensePercent,100)}%"></div>
+</div>
+
+<p style="color:${expenseColor};font-weight:bold;">
+${expenseStatus}
+</p>
+
+</div>
+
+<!-- ✅ CARD 3 -->
+<div class="card">
+
+<p>Emergency Fund: ₹${emergency6}</p>
+
+<div class="chartBox">
+<canvas id="emergencyChart"></canvas>
+</div>
+
+<p style="color:#38bdf8;font-weight:bold;">
+${advice}
+</p>
+
+<p style="color:${(emiRatio+expensePercent)>80?'#ef4444':'#22c55e'};font-weight:bold;">
+${riskAlert}
+</p>
+
+<p style="font-size:12px;">AI based estimation</p>
+
+</div>
+
+`;
+let ctx1 = document.getElementById("emergencyChart").getContext("2d");
+
+let gradient1 = ctx1.createLinearGradient(0,0,0,300);
+gradient1.addColorStop(0,"#22c55e");
+gradient1.addColorStop(1,"#0f172a");
+
+new Chart(ctx1,{
+type:'bar',
+data:{
+labels:['6 Months','9 Months','12 Months'],
+datasets:[{
+data:[emergency6,emergency9,emergency12],
+backgroundColor:gradient1,
+borderRadius:14,
+hoverBackgroundColor:'#4ade80',
+hoverBorderWidth:2,
+hoverBorderColor:'#22c55e'
+}]
+},
+options:{
+layout:{padding:{top:30}},
+animation:{
+duration:1500,
+easing:'easeOutQuart'
+},
+plugins:{
+legend:{display:false}
+},
+scales:{
+x:{ticks:{color:"white"}},
+y:{ticks:{color:"white"}}
+}
+},
+plugins:[{
+afterDatasetsDraw(chart){
+const {ctx}=chart;
+chart.data.datasets.forEach((d,i)=>{
+chart.getDatasetMeta(i).data.forEach((bar,index)=>{
+ctx.fillStyle="white";
+ctx.fillText("₹"+d.data[index],bar.x,bar.y-10);
+});
+});
+}
+}]
+});
+
+// ===== GOAL TAB (UNCHANGED) =====
+let inflation = 0.06;
+let rate = risk=="high"?0.14:risk=="medium"?0.12:0.08;
+let realReturn = ((1+rate)/(1+inflation)-1)*100;
+
+let r = rate/12;
+
+let inflatedGoal = goal*Math.pow(1+inflation,years);
+
+let sipNormal = goal/(((Math.pow(1+r,years*12)-1)/r)*(1+r));
+// 🎯 BEST SIP SUGGESTION
+
+let bestSip = sipNormal;
+
+
+let sipInflation = inflatedGoal/(((Math.pow(1+r,years*12)-1)/r)*(1+r));
+
+// ⚖️ RISK BASED SIP ADJUSTMENT (CORRECT PLACE)
+if(risk === "high"){
+    bestSip *= 0.9;
+}
+else if(risk === "low"){
+    bestSip *= 1.1;
+}
+
+let gap = sipInflation - sipNormal;
+let gapPercent = (gap / sipInflation) * 100;
+
+let statusText = "";
+let statusColor = "";
+
+if(gapPercent <= 10){
+    statusText = "✅ On Track";
+    statusColor = "#22c55e";
+}else if(gapPercent <= 30){
+    statusText = "⚠️ Slightly Behind";
+    statusColor = "#eab308";
+}else{
+    statusText = "🚨 Under Investing";
+    statusColor = "#ef4444";
+}
+
+// 🎯 SMART STEP-UP (TARGET MATCHING)
+
+let stepUpRate = 0.05; // start with 5%
+let futureValue = 0;
+
+for(let trial=0; trial<50; trial++){
+
+    futureValue = 0;
+    let currentSip = sipNormal;
+
+    for(let y=1;y<=years;y++){
+        for(let m=1;m<=12;m++){
+            futureValue += currentSip * Math.pow(1+r, (years*12 - ((y-1)*12+m)));
+        }
+        currentSip *= (1 + stepUpRate);
+    }
+
+    // stop when goal achieved
+    if(futureValue >= inflatedGoal) break;
+
+    stepUpRate += 0.01; // increase 1%
+}
+let months = years * 12;
+let yearlyIncome = income * 12;
+let wealthRatio = futureValue / yearlyIncome;
+
+let stepUpStatus = futureValue >= inflatedGoal ? "✅ Goal Achievable" : "⚠️ Still Short";
+// ✅ SUCCESS PROBABILITY
+let probability = (futureValue / inflatedGoal) * 100;
+if(probability < 90){
+    bestSip = sipInflation * 1.05;
+}
+
+// 🤖 AI RECOMMENDATION ENGINE
+
+let aiSuggestion = "";
+let aiColor = "";
+
+if(probability < 60){
+    aiSuggestion = "🚨 Increase SIP OR extend time horizon";
+    aiColor = "#ef4444";
+}
+else if(probability < 90){
+    aiSuggestion = "⚠️ Slight adjustment needed (increase SIP by 5-10%)";
+    aiColor = "#eab308";
+}
+else{
+    aiSuggestion = "✅ Perfect plan. Stay consistent 🚀";
+    aiColor = "#22c55e";
+}
+document.getElementById("goalTab").innerHTML=`
+
+<div class="card">
+
+<div class="highlight">
+SIP ₹${bestSip.toFixed(0)}/month 
+<span style="
+background:${realReturn < 4 ? '#ef4444' : '#22c55e'};
+color:#020617;
+padding:2px 6px;
+border-radius:6px;
+font-size:10px;
+margin-left:6px;
+font-weight:bold;
+">
+${realReturn < 4 ? '⚠️ Low Real Growth' : '🚀 Wealth Builder'}
+</span>
+</div>
+<p style="color:#94a3b8;">Inflation assumed: 6%</p>
+<p style="color:#22c55e;font-weight:bold;">
+💰 Real Return: ${realReturn.toFixed(1)}% (after inflation)
+</p>
+
+<p style="
+font-size:12px;
+color:${realReturn < 3 ? '#ef4444' : realReturn < 6 ? '#eab308' : '#22c55e'};
+font-weight:bold;
+">
+${realReturn < 3 ? '🚨 Wealth illusion (very low real growth)' :
+  realReturn < 6 ? '⚠️ Slow real growth' :
+  '✅ Strong real wealth creation'}
+</p>
+
+<div style="overflow-x:auto;">
+<div style="width:100%;height:300px;">
+<canvas id="goalChart"></canvas>
+<p style="
+margin-top:10px;
+padding:10px;
+border-radius:10px;
+background:rgba(239,68,68,0.1);
+color:#ef4444;
+border:1px solid #ef4444;
+font-size:12px;
+">
+⚠️ Future Wealth looks high, but real value is reduced due to inflation
+</p>
+</div>
+</div>
+
+<hr style="margin:20px 0;border-color:#1e293b;">
+
+<div class="highlight">Real SIP Needed ₹${sipInflation.toFixed(0)}/month</div>
+
+<p style="color:#f87171;font-size:13px;">
+⚠️ Goal grows ₹${goal} → ₹${inflatedGoal.toFixed(0)}
+</p>
+
+<div class="chartBox">
+<canvas id="sipCompare"></canvas>
+</div>
+
+<hr style="margin:20px 0;border-color:#1e293b;">
+
+<div class="card">
+<h3>📊 Investment Health</h3>
+<p style="font-size:18px;">
+Gap: <b style="color:#f87171;">₹${gap.toFixed(0)}</b>
+</p>
+<p style="color:${statusColor};font-weight:bold;">
+${statusText}
+</p>
+<p style="
+font-size:13px;
+padding:10px;
+border-radius:10px;
+background:${gapPercent > 30 ? 'rgba(239,68,68,0.15)' : 'rgba(56,189,248,0.1)'};
+color:${gapPercent > 30 ? '#ef4444' : '#38bdf8'};
+border:1px solid ${gapPercent > 30 ? '#ef4444' : '#38bdf8'};
+font-weight:bold;
+">
+⚠️ You need ₹${sipInflation.toFixed(0)} but investing ₹${sipNormal.toFixed(0)}
+</p>
+</div>
+
+<div class="card">
+<h3>📈 Auto SIP Increase Plan</h3>
+<p>Start SIP: <b>₹${sipNormal.toFixed(0)}</b></p>
+<p>Increase: <b>${(stepUpRate*100).toFixed(1)}% yearly</b></p>
+<p style="color:#38bdf8;">
+Projected Value: ₹${futureValue.toFixed(0)}
+</p>
+<p style="color:${futureValue >= inflatedGoal ? '#22c55e' : '#f87171'};font-weight:bold;">
+${stepUpStatus}
+</p>
+<p style="color:#a78bfa;">
+💰 Future Wealth ≈ ${wealthRatio.toFixed(1)}x your yearly salary
+</p>
+
+<p style="color:#38bdf8;">
+🎯 Success Probability: ${probability.toFixed(0)}%
+</p>
+
+<p style="color:${aiColor};font-weight:bold;">
+${aiSuggestion}
+</p>
+</div>
+
+</div>
+`;
+
+let corpus=[],real=[];
+
+for(let i=1;i<=years;i++){
+
+let months = i * 12;
+
+// ✅ CORRECT SIP FUTURE VALUE
+let fv = bestSip * ((Math.pow(1+r, months) - 1) / r) * (1+r);
+
+// ✅ REAL VALUE (inflation adjusted)
+let realVal = fv / Math.pow(1+inflation, i);
+
+corpus.push(fv);
+real.push(realVal);
+}
+
+let ctx2 = document.getElementById("goalChart").getContext("2d");
+
+let gradient2 = ctx2.createLinearGradient(0,0,0,300);
+gradient2.addColorStop(0,"#38bdf8");
+gradient2.addColorStop(1,"transparent");
+
+new Chart(ctx2,{
+type:'line',
+data:{
+labels:Array.from({length:years},(_,i)=>"Y"+(i+1)),
+datasets:[
+{
+label:'Future Wealth',
+data:corpus,
+borderColor:'#38bdf8',
+backgroundColor:gradient2,
+fill:true,
+tension:0.4,
+pointRadius:4,
+pointHoverRadius:6,
+pointBackgroundColor:'#38bdf8'
+},
+{
+label:'Real Value',
+data:real,
+borderColor:'#f472b6',
+tension:0.4,
+pointRadius:3,
+pointHoverRadius:5
+}
+]
+},
+options:{
+  responsive: true,
+  maintainAspectRatio: false,
+  animation:{
+duration:1500,
+easing:'easeOutQuart'
+},
+interaction:{
+mode:'index',
+intersect:false
+},
+plugins:{
+tooltip:{
+backgroundColor:'#020617',
+titleColor:'#38bdf8',
+bodyColor:'#fff'
+},
+legend:{labels:{color:"white"}}
+},
+scales:{
+x:{ticks:{color:"white"}},
+y:{ticks:{color:"white"}}
+}
+}
+});
+let ctx3 = document.getElementById("sipCompare").getContext("2d");
+
+let gradient3 = ctx3.createLinearGradient(0,0,0,300);
+gradient3.addColorStop(0,"#f87171");
+gradient3.addColorStop(1,"#0f172a");
+
+new Chart(ctx3,{
+type:'bar',
+data:{
+labels:['Without Inflation','With Inflation'],
+datasets:[{
+data:[sipNormal,sipInflation],
+backgroundColor:gradient3,
+borderRadius:12,
+hoverBackgroundColor:'#f87171'
+}]
+},
+options:{
+animation:{
+duration:1500,
+easing:'easeOutQuart'
+},
+interaction:{
+mode:'index'
+},
+plugins:{
+tooltip:{
+backgroundColor:'#020617',
+titleColor:'#f87171',
+bodyColor:'#fff'
+},
+legend:{display:false}
+},
+scales:{
+x:{ticks:{color:"white"}},
+y:{ticks:{color:"white"}}
+}
+}
+});
+
+// PORTFOLIO
+document.getElementById("portfolio").innerHTML = "⏳ Loading real funds...";
+renderPortfolio(risk);
+
+}
+
+async function getTopFunds(){
+
+// 🔥 CACHE (FAST LOAD)
+let cache = localStorage.getItem("topFunds");
+
+if(cache){
+  let parsed = JSON.parse(cache);
+
+  if(Date.now() - parsed.time < 12*60*60*1000){
+    return parsed.data;
+  }
+}
+
+// 🔥 FIXED BEST FUNDS (NO RANDOM)
+let schemes = [
+122639,
+120503,
+120716,
+120828,
+120465,
+125354,
+118834,
+119551,
+120186,
+118989
+];
+
+let results = [];
+
+for(let code of schemes){
+
+  try{
+
+    let res = await fetch(`https://api.mfapi.in/mf/${code}`);
+    let data = await res.json();
+
+    let nav = data.data;
+
+    if(!nav || nav.length < 200) continue;
+
+    let latest = parseFloat(nav[0].nav);
+    let old = parseFloat(nav[Math.min(750, nav.length-1)].nav);
+
+    let cagr = (Math.pow(latest/old,1/3)-1)*100;
+
+    results.push({
+      name: data.meta.scheme_name.substring(0,35),
+      return: cagr.toFixed(1)
+    });
+
+  }catch(e){
+    continue;
+  }
+}
+
+// 🔥 SORT
+results.sort((a,b)=>parseFloat(b.return)-parseFloat(a.return));
+
+// 🔥 SAVE CACHE
+localStorage.setItem("topFunds", JSON.stringify({
+  time: Date.now(),
+  data: results
+}));
+
+return results;
+}
+
+async function renderPortfolio(risk){
+
+let p = risk=="low"?{e:40,d:50,g:10}:
+risk=="medium"?{e:60,d:30,g:10}:
+{e:80,d:15,g:5};
+let recommendedType = "";
+let recommendedTag = "";
+
+if(risk === "high"){
+  recommendedTag = "small"; // aggressive
+}
+else if(risk === "medium"){
+  recommendedTag = "flexi";
+}
+else{
+  recommendedTag = "debt";
+}
+if(p.e >= 70){
+recommendedType = "Small / Mid Cap (High Growth)";
+}
+else if(p.e >= 50){
+recommendedType = "Flexi Cap (Balanced)";
+}
+else{
+recommendedType = "Large Cap / Debt (Stable)";
+}
+
+let funds = await getTopFunds();
+let category = document.getElementById("fundCategory")?.value || "all";
+
+if(category !== "all"){
+funds = funds.filter(f => {
+let name = f.name.toLowerCase();
+
+if(category === "small") return name.includes("small");
+if(category === "flexi") return name.includes("flexi");
+if(category === "mid") return name.includes("mid");
+if(category === "large") return name.includes("large");
+
+return true;
+});
+}
+
+funds.sort((a,b)=>parseFloat(b.return)-parseFloat(a.return));
+
+document.getElementById("portfolio").innerHTML=`
+
+<div class="card">
+
+<h3>📊 Recommended Portfolio</h3>
+
+<div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+
+<div style="color:#00c2ff;font-weight:bold;">
+● Equity ${p.e}%
+</div>
+
+<div style="color:#00ff88;font-weight:bold;">
+● Debt ${p.d}%
+</div>
+
+<div style="color:#ffd700;font-weight:bold;">
+● Gold ${p.g}%
+</div>
+
+</div>
+
+<div style="display:flex;height:20px;border-radius:10px;overflow:hidden;width:100%;">
+<div style="width:${p.e}%;background:#00c2ff"></div>
+<div style="width:${p.d}%;background:#00ff88"></div>
+<div style="width:${p.g}%;background:#ffd700"></div>
+</div>
+
+<!-- ✅ NEW SECTION ADD HERE -->
+
+<div style="margin-top:20px;">
+
+<!-- ✅ NEW TABS -->
+<div style="margin-top:20px;">
+
+<div style="display:flex;gap:10px;margin-bottom:12px;">
+<div class="optTab active equityTab" onclick="showOpt('equity',this)">Equity</div>
+<div class="optTab debtTab" onclick="showOpt('debt',this)">Debt</div>
+<div class="optTab goldTab" onclick="showOpt('gold',this)">Gold</div>
+</div>
+
+<div id="equity" class="optContent active">
+
+<div class="optGrid">
+
+<a href="https://groww.in/mutual-funds" target="_blank" class="optCard equityCard">📊  Mutual Funds ${recommendedTag==="flexi" ? '🔥 <span class="badge">AI Pick</span>' : ''}</a>
+
+<a href="https://kite.zerodha.com" target="_blank" class="optCard equityCard">📉 Stocks ${recommendedTag==="small" ? '🔥 <span class="badge">AI Pick</span>' : ''}</a>
+
+<a href="https://groww.in/etfs" target="_blank" class="optCard equityCard">📦 ETF</a>
+
+<a href="https://smallcase.com" target="_blank" class="optCard equityCard">🎯 Thematic</a>
+
+</div>
+
+</div>
+
+<div id="debt" class="optContent">
+
+<div class="optGrid">
+
+<a href="https://www.bankbazaar.com/fixed-deposit.html" target="_blank" class="optCard debtCard">💰 FD ${recommendedTag==="debt" ? '🔥 <span class="badge">AI Pick</span>' : ''}</a>
+
+<a href="https://groww.in/mutual-funds/category/debt" target="_blank" class="optCard debtCard">📊 Debt Funds</a>
+
+<a href="https://rbiretaildirect.org.in" target="_blank" class="optCard debtCard">📜 Govt Bonds</a>
+
+</div>
+
+</div>
+
+<div id="gold" class="optContent">
+
+<div class="optGrid">
+
+<a href="https://groww.in/gold" target="_blank" class="optCard goldCard">🪙 Digital Gold</a>
+
+<a href="https://www.rbi.org.in" target="_blank" class="optCard goldCard">🏅 SGB</a>
+
+<a href="https://www.nseindia.com" target="_blank" class="optCard goldCard">📊 Gold ETF</a>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="card">
+<div style="background:#020617;padding:12px;border-radius:10px;margin-bottom:10px;border:1px solid #1e293b;">
+🎯 Recommended: 
+<b style="color:#38bdf8;">${recommendedType}</b>
+</div>
+
+<div class="card">
+
+<h3>📚 Fund Types</h3>
+
+<div class="optGrid">
+
+<div class="optCard equityCard" onclick="showFundInfo('large')">📊 Large Cap</div>
+
+<div class="optCard equityCard" onclick="showFundInfo('mid')">📈 Mid Cap</div>
+
+<div class="optCard equityCard" onclick="showFundInfo('small')">🚀 Small Cap</div>
+
+<div class="optCard equityCard" onclick="showFundInfo('flexi')">🔄 Flexi Cap</div>
+
+<div class="optCard debtCard" onclick="showFundInfo('debt')">💰 Debt Funds</div>
+
+<div class="optCard goldCard" onclick="showFundInfo('gold')">🪙 Gold Funds</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="card">
+
+<h3>🚀 Invest Now</h3>
+
+<div style="display:flex;gap:10px;margin-top:10px;">
+
+<a href="https://kite.zerodha.com" target="_blank" onclick="trackClick('Zerodha')"
+style="flex:1;background:#ff5722;padding:12px;border-radius:10px;text-align:center;color:white;font-weight:bold;">
+Zerodha
+</a>
+
+<a href="https://groww.in" target="_blank" onclick="trackClick('Groww')"
+style="flex:1;background:#00c853;padding:12px;border-radius:10px;text-align:center;color:white;font-weight:bold;">
+Groww
+</a>
+
+<a href="https://smallcase.com" target="_blank" onclick="trackClick('Smallcase')"
+style="flex:1;background:#2979ff;padding:12px;border-radius:10px;text-align:center;color:white;font-weight:bold;">
+Smallcase
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+}
+function refreshFunds(){
+  document.getElementById("portfolio").innerHTML = "🔄 Refreshing...";
+  localStorage.removeItem("topFunds");
+  renderPortfolio(document.getElementById("risk").value);
+}
+function showFundInfo(type){
+
+let title = "";
+let desc = "";
+
+if(type==="large"){
+title="📊 Large Cap Funds";
+desc=`
+<b>🔹 Definition:</b><br>
+Large Cap funds invest in top 100 companies by market capitalization.<br><br>
+
+<b>🔹 How decided?</b><br>
+SEBI defines Large Cap = Top 100 companies (Reliance, TCS, HDFC Bank).<br><br>
+
+<b>🔹 Risk Level:</b><br>
+🟢 Low Risk (stable companies)<br><br>
+
+<b>🔹 Returns:</b><br>
+Moderate but consistent (10–12%)<br><br>
+
+<b>🔹 Best for:</b><br>
+Beginners & long-term stability
+`;
+}
+
+if(type==="mid"){
+title="📈 Mid Cap Funds";
+desc=`
+<b>🔹 Definition:</b><br>
+Mid Cap funds invest in companies ranked 101–250.<br><br>
+
+<b>🔹 How decided?</b><br>
+SEBI defines Mid Cap = companies ranked 101–250 by market size.<br><br>
+
+<b>🔹 Risk Level:</b><br>
+🟡 Medium Risk<br><br>
+
+<b>🔹 Returns:</b><br>
+Higher growth potential than large cap (12–16%)<br><br>
+
+<b>🔹 Best for:</b><br>
+Investors looking for growth + moderate risk
+`;
+}
+
+if(type==="small"){
+title="🚀 Small Cap Funds";
+desc=`
+<b>🔹 Definition:</b><br>
+Small Cap funds invest in companies ranked beyond top 250.<br><br>
+
+<b>🔹 How decided?</b><br>
+SEBI defines Small Cap = 251+ ranked companies.<br><br>
+
+<b>🔹 Risk Level:</b><br>
+🔴 High Risk (volatile)<br><br>
+
+<b>🔹 Returns:</b><br>
+Very high growth potential (15–25%+)<br><br>
+
+<b>🔹 Best for:</b><br>
+Aggressive investors & long-term wealth creation
+`;
+}
+
+if(type==="flexi"){
+title="🔄 Flexi Cap Funds";
+desc=`
+<b>🔹 Definition:</b><br>
+Flexi Cap funds can invest in Large, Mid & Small cap freely.<br><br>
+
+<b>🔹 How decided?</b><br>
+No restriction — fund manager allocates dynamically.<br><br>
+
+<b>🔹 Risk Level:</b><br>
+🟡 Balanced Risk<br><br>
+
+<b>🔹 Returns:</b><br>
+Depends on allocation (12–15%)<br><br>
+
+<b>🔹 Best for:</b><br>
+Investors who want diversification in one fund
+`;
+}
+
+if(type==="debt"){
+title="💰 Debt Funds";
+desc=`
+<b>🔹 Definition:</b><br>
+Debt funds invest in bonds, govt securities, FD-like instruments.<br><br>
+
+<b>🔹 How decided?</b><br>
+Based on fixed income securities (RBI bonds, corporate bonds).<br><br>
+
+<b>🔹 Risk Level:</b><br>
+🟢 Low Risk<br><br>
+
+<b>🔹 Returns:</b><br>
+Stable but low (6–8%)<br><br>
+
+<b>🔹 Best for:</b><br>
+Capital protection & short-term goals
+`;
+}
+
+if(type==="gold"){
+title="🪙 Gold Funds";
+desc=`
+<b>🔹 Definition:</b><br>
+Gold funds invest in gold ETFs or Sovereign Gold Bonds.<br><br>
+
+<b>🔹 How decided?</b><br>
+Tracks gold prices (international + Indian market).<br><br>
+
+<b>🔹 Risk Level:</b><br>
+🟡 Medium (price fluctuation)<br><br>
+
+<b>🔹 Returns:</b><br>
+Depends on gold trend<br><br>
+
+<b>🔹 Best for:</b><br>
+Hedge against inflation & market crash
+`;
+}
+
+document.getElementById("fundTitle").innerHTML = title;
+document.getElementById("fundDesc").innerHTML = desc;
+
+document.getElementById("fundInfoBox").style.bottom = "0";
+document.getElementById("overlay").style.opacity = "1";
+document.getElementById("overlay").style.pointerEvents = "auto";
+
+}
+function showOpt(id,el){
+
+document.querySelectorAll(".optContent")
+.forEach(e=>e.classList.remove("active"));
+
+document.getElementById(id).classList.add("active");
+
+document.querySelectorAll(".optTab")
+.forEach(t=>t.classList.remove("active"));
+
+el.classList.add("active");
+
+}
+
+window.addEventListener("DOMContentLoaded", function () {
+
+  // existing code (already present)
+  document.getElementById("expensePercent").addEventListener("input", function () {
+    if (this.value > 100) this.value = 100;
+    if (this.value < 0) this.value = 0;
+  });
+
+  // 🔥 ADD THIS BELOW
+  ["income","emi","goal"].forEach(id => {
+
+    let el = document.getElementById(id);
+
+    el.addEventListener("input", function(){
+
+      let val = this.value.replace(/,/g,'');   // remove old commas
+      val = val.replace(/[^0-9]/g,'');         // only numbers
+
+      this.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // add commas
+
+    });
+
+  });
+
+});
+function closeFundInfo(){
+document.getElementById("fundInfoBox").style.bottom = "-100%";
+
+document.getElementById("overlay").style.opacity = "0";
+document.getElementById("overlay").style.pointerEvents = "none";
+}
+document.getElementById("overlay").addEventListener("click", closeFundInfo);
+let sheet = document.getElementById("fundInfoBox");
+
+let startY = 0;
+let currentY = 0;
+let isDragging = false;
+
+sheet.addEventListener("touchstart", (e)=>{
+startY = e.touches[0].clientY;
+isDragging = true;
+});
+
+sheet.addEventListener("touchmove", (e)=>{
+if(!isDragging) return;
+
+currentY = e.touches[0].clientY;
+let diff = currentY - startY;
+
+if(diff > 0){
+sheet.style.transform = `translateY(${diff}px)`;
+}
+});
+
+sheet.addEventListener("touchend", ()=>{
+isDragging = false;
+
+if(currentY - startY > 100){
+closeFundInfo();
+}else{
+sheet.style.transform = "translateY(0)";
+}
+});
+let isMouseDown = false;
+
+sheet.addEventListener("mousedown", (e)=>{
+startY = e.clientY;
+isMouseDown = true;
+});
+
+window.addEventListener("mousemove", (e)=>{
+if(!isMouseDown) return;
+
+let diff = e.clientY - startY;
+if(diff > 0){
+sheet.style.transform = `translateY(${diff}px)`;
+}
+});
+
+window.addEventListener("mouseup", ()=>{
+if(!isMouseDown) return;
+
+isMouseDown = false;
+
+if(currentY - startY > 100){
+closeFundInfo();
+}else{
+sheet.style.transform = "translateY(0)";
+}
+});
+</script>
+<div id="overlay" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(6px);
+opacity:0;
+pointer-events:none;
+transition:0.3s;
+z-index:998;
+"></div>
+<div id="dragHandle" style="
+width:50px;
+height:5px;
+background:#475569;
+border-radius:10px;
+margin:0 auto 10px auto;
+"></div>
+<div id="fundInfoBox" style="
+position:fixed;
+bottom:-100%;
+left:0;
+width:100%;
+background:#020617;
+color:white;
+padding:20px;
+text-align:center;
+border-top-left-radius:20px;
+border-top-right-radius:20px;
+box-shadow:0 -20px 60px rgba(0,0,0,0.9);
+transition:0.35s cubic-bezier(0.22,1,0.36,1);
+z-index:999;
+touch-action:none;
+">
+
+<div style="display:flex;justify-content:center;align-items:center;position:relative;">
+<h3 id="fundTitle">Fund Info</h3>
+<span onclick="closeFundInfo()" style="
+position:absolute;
+right:10px;
+top:0;
+cursor:pointer;
+font-size:20px;
+color:#ef4444;
+">❌</span>
+</div>
+
+<p id="fundDesc" style="margin-top:10px;font-size:14px;color:#94a3b8;"></p>
+
+</div>
+
+</body>
+</html>
